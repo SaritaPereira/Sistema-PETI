@@ -23,3 +23,11 @@ CREATE TABLE projetos (
     custo DECIMAL(10,2), 
     prazo DATE
 );
+
+/*CREATE TABLE projetos_objetivos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    projeto_id INT,
+    objetivo_id INT,
+    FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE,
+    FOREIGN KEY (objetivo_id) REFERENCES objetivos(id) ON DELETE CASCADE
+);*/

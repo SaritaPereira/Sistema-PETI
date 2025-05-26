@@ -1,7 +1,6 @@
 <?php
 include 'conexao.php';
 
-// Buscar dados existentes no banco
 $dados = [];
 $sql = "SELECT nome, missao, visao FROM organizacao LIMIT 1";
 $result = $conn->query($sql);
@@ -14,22 +13,22 @@ $conn->close();
 ?>
 
 <?php
-// No início do arquivo, antes de qualquer HTML
+// Exibir mensagens de sucesso ou erro
 if (isset($_GET['sucesso'])) {
-    $mensagem = match($_GET['sucesso']) {
+    $mensagem = match ($_GET['sucesso']) {
         'dados_salvos' => 'Salvo com sucesso!',
         default => 'Operação realizada com sucesso!'
     };
-    echo '<div class="alert success" id="success-message">'.$mensagem.'</div>';
+    echo '<div class="alert success" id="success-message">' . $mensagem . '</div>';
 }
 
 if (isset($_GET['erro'])) {
-    $mensagem = match($_GET['erro']) {
+    $mensagem = match ($_GET['erro']) {
         'campos_vazios' => 'Todos os campos são obrigatórios!',
         'banco_dados' => 'Erro ao salvar no banco de dados',
         default => 'Ocorreu um erro!'
     };
-    echo '<div class="alert error" id="error-message">'.$mensagem.'</div>';
+    echo '<div class="alert error" id="error-message">' . $mensagem . '</div>';
 }
 ?>
 
@@ -49,28 +48,28 @@ if (isset($_GET['erro'])) {
         <ul class="navbar-menu">
             <li><a href="home.php"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="cadastro_empresa.php"><i class="fas fa-building"></i> Dados da Empresa</a></li>
-            <li><a href="#"><i class="fas fa-project-diagram"></i> Projetos (Em Breve)</a></li>
-            <li><a href="#"><i class="fas fa-bullseye"></i> Objetivos (Em Breve)</a></li>
+            <li><a href="cadastro_projeto.php"><i class="fas fa-project-diagram"></i> Projetos</a></li>
+            <li><a href="cadastro_objetivo.php"><i class="fas fa-bullseye"></i> Objetivos</a></li>
         </ul>
     </nav>
     <div class="content">
         <header class="header">
             <h1>Cadastro de Missão e Visão</h1>
-            <p>Preencha os dados abaixo para configurar a missão e visão da sua organização.</p>
+            <p>Preencha os dados abaixo.</p>
         </header>
         <div class="form-container">
             <form action="salvar_missao_visao.php" method="POST" class="form" id="cadastro-form">
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" value="<?php echo isset($dados['nome']) ? htmlspecialchars($dados['nome']) : ''; ?>" required>
+                    <input type="text" id="nome" name="nome" value="<?php echo (isset($_GET['sucesso']) ? '' : (isset($dados['nome']) ? htmlspecialchars($dados['nome']) : '')); ?>" required>
                 </div>
                 <div class="form-group">
                     <label for="missao">Missão:</label>
-                    <textarea name="missao" id="missao" rows="4" cols="50" required><?php echo isset($dados['missao']) ? htmlspecialchars($dados['missao']) : ''; ?></textarea>
+                    <textarea name="missao" id="missao" rows="4" cols="50" required><?php echo (isset($_GET['sucesso']) ? '' : (isset($dados['missao']) ? htmlspecialchars($dados['missao']) : '')); ?></textarea>
                 </div>
                 <div class="form-group">
                     <label for="visao">Visão:</label>
-                    <textarea name="visao" id="visao" rows="4" cols="50" required><?php echo isset($dados['visao']) ? htmlspecialchars($dados['visao']) : ''; ?></textarea>
+                    <textarea name="visao" id="visao" rows="4" cols="50" required><?php echo (isset($_GET['sucesso']) ? '' : (isset($dados['visao']) ? htmlspecialchars($dados['visao']) : '')); ?></textarea>
                 </div>
                 <button type="submit" class="btn">Salvar</button>
             </form>
@@ -78,31 +77,32 @@ if (isset($_GET['erro'])) {
     </div>
 
     <script>
-        // Limpar os campos do formulário e estilizar a notificação de sucesso
         document.addEventListener('DOMContentLoaded', function() {
             const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
             const form = document.getElementById('cadastro-form');
 
             if (successMessage) {
-                // Limpar os campos do formulário
-                form.reset();
-
-                // Adicionar efeito de fade-out após 3 segundos
+                form.reset(); // Reseta o formulário se a mensagem de sucesso estiver presente
                 setTimeout(() => {
+                    successMessage.style.transition = 'opacity 0.5s';
                     successMessage.style.opacity = '0';
                     setTimeout(() => {
                         successMessage.style.display = 'none';
-                    }, 500); // Tempo para o fade-out
-                }, 3000); // Exibe por 3 segundos
+                        // Remove o parâmetro 'sucesso' da URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }, 500);
+                }, 3000);
             }
 
-            const errorMessage = document.getElementById('error-message');
             if (errorMessage) {
-                // Adicionar efeito de fade-out para mensagens de erro também
                 setTimeout(() => {
+                    errorMessage.style.transition = 'opacity 0.5s';
                     errorMessage.style.opacity = '0';
                     setTimeout(() => {
                         errorMessage.style.display = 'none';
+                        // Remove o parâmetro 'erro' da URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
                     }, 500);
                 }, 3000);
             }
