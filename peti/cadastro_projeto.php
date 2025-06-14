@@ -2,24 +2,56 @@
 include 'conexao.php';
 
 $dados = [];
-$sql = "SELECT nome, missao, visao FROM organizacao LIMIT 1";
-$result = $conn->query($sql);
+$edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
 
-if ($result->num_rows > 0) {
-    $dados = $result->fetch_assoc();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'salvar') {
+    $nome = $_POST['nome'];
+    $responsavel = $_POST['responsavel'];
+    $custo = $_POST['custo'];
+    $prazo = $_POST['prazo'];
+
+    if ($nome && $responsavel && $custo && $prazo) {
+        if ($edit_id) {
+            $sql = "UPDATE projetos SET nome=?, responsavel=?, custo=?, prazo=? WHERE id=?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssd", $nome, $responsavel, $custo, $prazo, $edit_id);
+        } else {
+            $sql = "INSERT INTO projetos (nome, responsavel, custo, prazo) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssd", $nome, $responsavel, $custo, $prazo);
+        }
+        if ($stmt->execute()) {
+            header("Location: cadastro_projeto.php?sucesso=dados_salvos");
+        } else {
+            header("Location: cadastro_projeto.php?erro=banco_dados");
+        }
+    } else {
+        header("Location: cadastro_projeto.php?erro=campos_vazios");
+    }
+}
+
+$sql = "SELECT * FROM projetos";
+$result = $conn->query($sql);
+$projetos = $result->fetch_all(MYSQLI_ASSOC);
+
+if ($edit_id) {
+    $sql = "SELECT * FROM projetos WHERE id=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $edit_id);
+    $stmt->execute();
+    $dados = $stmt->get_result()->fetch_assoc();
 }
 
 $conn->close();
 ?>
 
 <?php
-
 if (isset($_GET['sucesso'])) {
     $mensagem = match($_GET['sucesso']) {
         'dados_salvos' => 'Salvo com sucesso!',
         default => 'Operação realizada com sucesso!'
     };
-    echo '<div class="alert success" id="success-message">'.$mensagem.'</div>';
+    echo '<div class="alert success" id="success-message">' . $mensagem . '</div>';
 }
 
 if (isset($_GET['erro'])) {
@@ -28,7 +60,7 @@ if (isset($_GET['erro'])) {
         'banco_dados' => 'Erro ao salvar no banco de dados',
         default => 'Ocorreu um erro!'
     };
-    echo '<div class="alert error" id="error-message">'.$mensagem.'</div>';
+    echo '<div class="alert error" id="error-message">' . $mensagem . '</div>';
 }
 ?>
 
@@ -59,6 +91,7 @@ if (isset($_GET['erro'])) {
         </header>
         <div class="form-container">
             <form action="cadastro_projeto.php" method="POST" class="form" id="cadastro-form">
+                <input type="hidden" name="acao" value="salvar">
                 <div class="form-group">
                     <label for="nome">Nome:</label>
                     <input type="text" id="nome" name="nome" value="<?php echo isset($dados['nome']) ? htmlspecialchars($dados['nome']) : ''; ?>" required>
@@ -69,46 +102,67 @@ if (isset($_GET['erro'])) {
                 </div>
                 <div class="form-group">
                     <label for="custo">Custo:</label>
-                    <input type="text" id="custo" name="custo" value="<?php echo isset($dados['custo']) ? htmlspecialchars($dados['custo']) : ''; ?>" required>
+                    <input type="number" step="0.01" id="custo" name="custo" value="<?php echo isset($dados['custo']) ? htmlspecialchars($dados['custo']) : ''; ?>" required>
                 </div>
                 <div class="form-group">
                     <label for="prazo">Prazo:</label>
                     <input type="date" id="prazo" name="prazo" value="<?php echo isset($dados['prazo']) ? htmlspecialchars($dados['prazo']) : ''; ?>" required>
                 </div>
-                <button type="submit" class="btn">Salvar</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn save">Salvar</button>
+                    <button type="button" class="btn cancel" onclick="window.location.href='home.php'">Cancelar</button>
+                </div>
             </form>
+            <div class="table-container">
+                <h2>Projetos Cadastrados</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Responsável</th>
+                            <th>Custo</th>
+                            <th>Prazo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($projetos as $projeto): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($projeto['nome']); ?></td>
+                                <td><?php echo htmlspecialchars($projeto['responsavel']); ?></td>
+                                <td>R$ <?php echo number_format($projeto['custo'], 2, ',', '.'); ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($projeto['prazo'])); ?></td>
+                                <td>
+                                    <a href="cadastro_projeto.php?edit=<?php echo $projeto['id']; ?>" class="btn edit">Editar</a>
+                                    <a href="delete_projeto.php?id=<?php echo $projeto['id']; ?>" class="btn delete" onclick="return confirm('Tem certeza?')">Excluir</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <a href="home.php" class="back-link">← Voltar ao início</a>
         </div>
     </div>
     <script>
-        // Limpar os campos do formulário e estilizar a notificação de sucesso
         document.addEventListener('DOMContentLoaded', function() {
             const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
             const form = document.getElementById('cadastro-form');
 
             if (successMessage) {
-                // Limpar os campos do formulário
                 form.reset();
-
-                // Adicionar efeito de fade-out após 3 segundos
                 setTimeout(() => {
                     successMessage.style.opacity = '0';
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 500); // Tempo para o fade-out
-                }, 3000); // Exibe por 3 segundos
+                    setTimeout(() => successMessage.style.display = 'none', 500);
+                }, 3000);
             }
 
-            const errorMessage = document.getElementById('error-message');
             if (errorMessage) {
-                // Adicionar efeito de fade-out para mensagens de erro também
                 setTimeout(() => {
                     errorMessage.style.opacity = '0';
-                    setTimeout(() => {
-                        errorMessage.style.display = 'none';
-                    }, 500);
+                    setTimeout(() => errorMessage.style.display = 'none', 500);
                 }, 3000);
             }
         });
     </script>
-</body>
-</html>

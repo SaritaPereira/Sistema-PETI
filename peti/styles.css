@@ -103,15 +103,16 @@ body {
 
 .form-group label {
     display: block;
-    margin-bottom: 8px; 
+    margin-bottom: 8px;
     color: rgb(74, 74, 74);
     font-weight: bold;
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
-    padding: 12px; 
+    padding: 12px;
     border: 1px solid rgb(204, 204, 204);
     border-radius: 5px;
     font-size: 1em;
@@ -119,17 +120,20 @@ body {
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
-    border-color: rgb(74, 74, 74); 
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: rgb(74, 74, 74);
     box-shadow: 0 0 5px rgba(74, 74, 74, 0.3);
     outline: none;
 }
 
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
 .btn {
-    margin-top: 20px;
     padding: 12px 30px;
-    background-color: rgb(74, 74, 74);
-    color: rgb(255, 255, 255);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -137,17 +141,41 @@ body {
     transition: background-color 0.3s, transform 0.2s;
 }
 
+.btn.save {
+    background-color: rgb(34, 139, 34);
+    color: rgb(255, 255, 255);
+}
+
+.btn.cancel {
+    background-color: rgb(220, 20, 60);
+    color: rgb(255, 255, 255);
+}
+
+.btn.edit {
+    background-color: rgb(0, 120, 215);
+    color: rgb(255, 255, 255);
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.btn.delete {
+    background-color: rgb(220, 20, 60);
+    color: rgb(255, 255, 255);
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
 .btn:hover {
-    background-color: rgb(106, 106, 106);
+    opacity: 0.9;
 }
 
 .btn:active {
-    transform: scale(0.98); 
+    transform: scale(0.98);
 }
 
 .alert {
     padding: 15px;
-    margin: 15px 0; 
+    margin: 15px 0;
     border-radius: 8px;
     border: 1px solid transparent;
     text-align: center;
@@ -160,68 +188,45 @@ body {
 .success {
     background-color: rgb(212, 237, 218);
     color: #155724;
-    border-color: rgb(195, 230, 203); 
+    border-color: rgb(195, 230, 203);
 }
 
 .error {
     background-color: rgb(248, 215, 218);
     color: rgb(114, 28, 36);
-    border-color: rgb(245, 198, 203); 
+    border-color: rgb(245, 198, 203);
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+.table-container {
+    margin-top: 20px;
+}
+
+table {
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1001;
-    justify-content: center;
-    align-items: center;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-.modal-content {
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid rgb(204, 204, 204);
 }
 
-.modal-content p {
-    margin: 0 0 20px 0;
+th {
+    background-color: rgb(245, 245, 245);
     color: rgb(74, 74, 74);
-    font-size: 1.2em;
-}
-
-.modal-close {
-    padding: 10px 20px;
-    background-color: rgb(74, 74, 74);
-    color: rgb(255, 255, 255);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.modal-close:hover {
-    background-color: rgb(106, 106, 106);
 }
 
 .back-link {
     display: inline-block;
     margin-top: 10px;
-    color: rgb(74, 74, 74);
+    color: rgb(0, 120, 215);
     text-decoration: none;
 }
 
 .back-link:hover {
     text-decoration: underline;
-    color: rgb(106, 106, 106);
 }
 
 @media (max-width: 768px) {
@@ -250,7 +255,7 @@ body {
 
     .content {
         margin-top: 120px;
-        max-width: 90%; 
+        max-width: 90%;
     }
 
     .form-container {
@@ -258,8 +263,9 @@ body {
     }
 
     .form-group input,
-    .form-group textarea {
-        font-size: 0.9em; 
+    .form-group textarea,
+    .form-group select {
+        font-size: 0.9em;
     }
 
     .alert {
@@ -267,7 +273,7 @@ body {
         padding: 12px;
     }
 
-    .modal-content {
-        width: 80%;
+    .table-container table {
+        font-size: 0.9em;
     }
 }
